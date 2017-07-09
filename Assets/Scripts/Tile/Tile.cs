@@ -51,15 +51,15 @@ public class Tile
     public void ChangeNextTo()
     {
         int x = (int)Position.x, y = (int)Position.y;
-        var dir = "";
-        if (x > 0)
+        string dir = "";
+        if (x < TileEngine.Width - 1)
         {
             if (TileEngine.Tiles[x + 1, y].TileType.Type == "wall")
             {
                 dir += "w";
             }
         }
-        if (x < TileEngine.Width - 1)
+        if (x > 0)
         {
             if (TileEngine.Tiles[x - 1, y].TileType.Type == "wall")
             {
@@ -84,22 +84,32 @@ public class Tile
 
         if ("wall-" + dir != TileType.Name)
         {
+            Debug.Log(dir);
             ChangeTileSprite(TileEngine.GetTileType("wall-" + dir));
-            if (dir.Contains("n"))
+            if (dir.Contains("n") && y < TileEngine.Heigth - 1)
             {
-                TileEngine.Tiles[x, y + 1].ChangeNextTo();
+                Debug.Log(1);
+                if (TileEngine.Tiles[x, y + 1].TileType.Type == "wall")
+                    TileEngine.Tiles[x, y + 1].ChangeNextTo();
             }
-            if (dir.Contains("s"))
+            if (dir.Contains("s") && y > 0)
             {
-                TileEngine.Tiles[x, y - 1].ChangeNextTo();
+                Debug.Log(2);
+                if (TileEngine.Tiles[x, y - 1].TileType.Type == "wall")
+                    TileEngine.Tiles[x, y - 1].ChangeNextTo();
             }
-            if (dir.Contains("w"))
+            if (dir.Contains("w") && x < TileEngine.Width - 1)
             {
-                TileEngine.Tiles[x + 1, y].ChangeNextTo();
+                Debug.Log(TileEngine.Tiles[x + 1, y].TileType.Type);
+                if (TileEngine.Tiles[x + 1, y].TileType.Type == "wall")
+                    TileEngine.Tiles[x + 1, y].ChangeNextTo();
             }
-            if (dir.Contains("e"))
+            if (dir.Contains("e") && x > 0)
             {
-                TileEngine.Tiles[x - 1, y].ChangeNextTo();
+                Debug.Log(4);
+                Debug.Log(TileEngine.Tiles[x - 1, y].TileType.Type);
+                if (TileEngine.Tiles[x - 1, y].TileType.Type == "wall")
+                    TileEngine.Tiles[x - 1, y].ChangeNextTo();
             }
 
         }
