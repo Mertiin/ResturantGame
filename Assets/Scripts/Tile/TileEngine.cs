@@ -16,10 +16,10 @@ public class TileEngine : MonoBehaviour
     public int TileHeight = 32;
 
 
-    private Tile[,] Tiles;
+    public Tile[,] Tiles;
     private List<Tile> ShadowTiles = new List<Tile>();
 
-    private TileType GetTileType(string name)
+    public TileType GetTileType(string name)
     {
         return TileTypes.FirstOrDefault(c => c.Name == name);
     }
@@ -28,17 +28,12 @@ public class TileEngine : MonoBehaviour
     {
         defaultTileType = GetTileType(DefaultTileTypeName);
 
-        for (var i = 0; i < 100; i++)
-        {
-            SpawnShadow();
-        }
-
         Tiles = new Tile[Width, Heigth];
         for (var x = 0; x < Width; x++)
         {
             for (var y = 0; y < Heigth; y++)
             {
-                var tile = new Tile("tile-" + x + "_" + y, defaultTileType, new Vector2(x, y), TileContainer);
+                var tile = new Tile(this, "tile-" + x + "_" + y, defaultTileType, new Vector2(x, y), TileContainer);
                 Tiles[x, y] = tile;
             }
         }
@@ -46,7 +41,7 @@ public class TileEngine : MonoBehaviour
 
     public Tile SpawnShadow()
     {
-        var shadowTile = new Tile("shadow" + ShadowTiles.Count, defaultTileType, Vector2.zero, TileContainer, 0.5f);
+        var shadowTile = new Tile(this, "shadow" + ShadowTiles.Count, defaultTileType, Vector2.zero, TileContainer, 0.5f);
         shadowTile.Deactivate();
         ShadowTiles.Add(shadowTile);
         return shadowTile;
@@ -57,9 +52,14 @@ public class TileEngine : MonoBehaviour
 
     int tmpX, tmpY, stopX, stopY;
     // Update is called once per frame
+    TileType buildType;
     void Update()
     {
-        var buildType = GetTileType("wall");
+        if (buildType == null)
+        {
+            buildType = GetTileType("wall-we");
+        }
+
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         var hitCollider = Physics2D.OverlapPoint(mousePosition);
 
@@ -96,7 +96,23 @@ public class TileEngine : MonoBehaviour
                 stopY = tmpY;
                 tmpY = tmp;
             }
-            Debug.Log("x" + tmpX + "_y" + tmpY + "_sx" + stopX + "_sy" + stopY);
+            if (stopX >= Width)
+            {
+                stopX = Width - 1;
+            }
+            if (tmpX < 0)
+            {
+                tmpX = 0;
+            }
+            if (stopY >= Heigth)
+            {
+                stopY = Heigth - 1;
+            }
+            if (tmpY < 0)
+            {
+                tmpY = 0;
+            }
+
             int shadowUsages = 0;
 
             foreach (var shadow in ShadowTiles)
@@ -133,7 +149,7 @@ public class TileEngine : MonoBehaviour
             {
                 for (var y = tmpY; y <= stopY; y++)
                 {
-                    Tiles[x, y].ChangeTileSprite(buildType);
+                    Tiles[x, y].ChangeNextTo();
                 }
             }
             foreach (var shadow in ShadowTiles)
