@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tile
-{
-    public GameObject GameObject;
-    private SpriteRenderer spriteRenderer;
-    private TileEngine TileEngine;
-    public TileType TileType;
-    public Vector2 Position;
 
-    public Tile(TileEngine tileEngine, string tileName, TileType TileType, Vector2 startPosition, GameObject parent = null, float opacity = 1f)
+public class Tile : TileObject
+{
+    private TileEngine TileEngine;
+    public Furniture Furniture;
+
+    public Tile(TileEngine tileEngine, string tileName, TileSprite tileSprite, Vector2 startPosition, GameObject parent = null, float opacity = 1f)
     {
+        TileName = tileName;
         TileEngine = tileEngine;
         GameObject = new GameObject(tileName);
-        this.TileType = TileType;
+        TileSprite = tileSprite;
         spriteRenderer = GameObject.AddComponent(typeof(SpriteRenderer)) as SpriteRenderer;
-        spriteRenderer.sprite = TileType.Sprite;
+        spriteRenderer.sprite = TileSprite.Sprite;
         spriteRenderer.color = new Color(1f, 1f, 1f, opacity);
         if (parent != null)
         {
@@ -26,49 +25,105 @@ public class Tile
         Position = startPosition;
     }
 
-    public void Activate()
+    public void AddFurniture(TileSprite tileSprite)
     {
-        GameObject.SetActive(true);
+        if (this.TileSprite.Walkspeed > 0)
+        {
+            if (Furniture != null)
+                Furniture.Destroy();
+            Furniture = new Furniture(this, tileSprite);
+        }
     }
 
-    public void Deactivate()
+    private TileSprite NewSpirte;
+    public void Build(TileSprite newSprite)
     {
-        GameObject.SetActive(false);
+        NewSpirte = newSprite;
+        if (newSprite.Name != TileSprite.Name)
+        {
+            if (newSprite.Type == TileType.Wall)
+            {
+                BuildWall();
+            }
+            else if (newSprite.Type == TileType.Furniture)
+            {
+                AddFurniture(newSprite);
+            }
+            else
+            {
+                ChangeTileSprite(newSprite);
+                CheckNextTo();
+            }
+        }
     }
 
-    public void SetPosition(Vector2 position)
+    public void CheckNextTo()
     {
-        Position = position;
-        GameObject.transform.position = position;
+        Tile tile;
+        int x = (int)Position.x;
+        int y = (int)Position.y;
+        if (x < TileEngine.Width - 1)
+        {
+            tile = TileEngine.Tiles[x + 1, y];
+            if (tile.TileSprite.Type == TileType.Wall)
+            {
+                tile.TileEngine.Tiles[x + 1, y].BuildWall();
+            }
+        }
+        if (x > 0)
+        {
+            tile = TileEngine.Tiles[x - 1, y];
+            if (tile.TileSprite.Type == TileType.Wall)
+            {
+                tile.BuildWall();
+            }
+        }
+        if (y < TileEngine.Heigth - 1)
+        {
+            tile = TileEngine.Tiles[x, y + 1];
+            if (tile.TileSprite.Type == TileType.Wall)
+            {
+                tile.BuildWall();
+            }
+        }
+
+        if (y > 0)
+        {
+            tile = TileEngine.Tiles[x, y - 1];
+            if (tile.TileSprite.Type == TileType.Wall)
+            {
+                tile.BuildWall();
+            }
+        }
     }
 
-    public void ChangeTileSprite(TileType tileType)
-    {
-        TileType = tileType;
-        spriteRenderer.sprite = tileType.Sprite;
-    }
-
-    public void ChangeNextTo()
+    public void BuildWall()
     {
         int x = (int)Position.x, y = (int)Position.y;
+        if (Furniture != null)
+        {
+            Furniture.Destroy();
+            Furniture = null;
+        }
+
         string dir = "";
         if (x < TileEngine.Width - 1)
         {
-            if (TileEngine.Tiles[x + 1, y].TileType.Type == "wall")
+            if (TileEngine.Tiles[x + 1, y].TileSprite.Type == TileType.Wall)
             {
                 dir += "w";
             }
         }
         if (x > 0)
         {
-            if (TileEngine.Tiles[x - 1, y].TileType.Type == "wall")
+            if (TileEngine.Tiles[x - 1, y].TileSprite.Type == TileType.Wall)
             {
                 dir += "e";
             }
         }
         if (y < TileEngine.Heigth - 1)
         {
-            if (TileEngine.Tiles[x, y + 1].TileType.Type == "wall")
+            if (TileEngine.Tiles[x, y + 1].TileSprite.Type == TileType.Wall)
             {
                 dir += "n";
             }
@@ -76,42 +131,16 @@ public class Tile
 
         if (y > 0)
         {
-            if (TileEngine.Tiles[x, y - 1].TileType.Type == "wall")
+            if (TileEngine.Tiles[x, y - 1].TileSprite.Type == TileType.Wall)
             {
                 dir += "s";
             }
         }
 
-        if ("wall-" + dir != TileType.Name)
+        if (NewSpirte.FullName + dir != TileSprite.FullName)
         {
-            Debug.Log(dir);
-            ChangeTileSprite(TileEngine.GetTileType("wall-" + dir));
-            if (dir.Contains("n") && y < TileEngine.Heigth - 1)
-            {
-                Debug.Log(1);
-                if (TileEngine.Tiles[x, y + 1].TileType.Type == "wall")
-                    TileEngine.Tiles[x, y + 1].ChangeNextTo();
-            }
-            if (dir.Contains("s") && y > 0)
-            {
-                Debug.Log(2);
-                if (TileEngine.Tiles[x, y - 1].TileType.Type == "wall")
-                    TileEngine.Tiles[x, y - 1].ChangeNextTo();
-            }
-            if (dir.Contains("w") && x < TileEngine.Width - 1)
-            {
-                Debug.Log(TileEngine.Tiles[x + 1, y].TileType.Type);
-                if (TileEngine.Tiles[x + 1, y].TileType.Type == "wall")
-                    TileEngine.Tiles[x + 1, y].ChangeNextTo();
-            }
-            if (dir.Contains("e") && x > 0)
-            {
-                Debug.Log(4);
-                Debug.Log(TileEngine.Tiles[x - 1, y].TileType.Type);
-                if (TileEngine.Tiles[x - 1, y].TileType.Type == "wall")
-                    TileEngine.Tiles[x - 1, y].ChangeNextTo();
-            }
-
+            ChangeTileSprite(TileEngine.GetTileSprite(NewSpirte.FullName + dir));
+            CheckNextTo();
         }
     }
 }

@@ -1,0 +1,102 @@
+[
+    {
+        "Path": "Objects/empty",
+        "Type": 0,
+        "Walkspeed": 1.0
+    },
+    {
+        "Path": "Objects/floorKitchen",
+        "Type": 0,
+        "Walkspeed": 1.0
+    },
+    {
+        "Path": "Objects/floorWood",
+        "Type": 0,
+        "Walkspeed": 1.0
+    },
+    {
+        "Path": "Objects/Table",
+        "Type": 2,
+        "Walkspeed": 1.0
+    },
+    {
+        "Path": "Walls/wall-we",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-ws",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-wn",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-ns",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-en",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-wes",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-wens",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-wen",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-es",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-e",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-w",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-n",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-s",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-ens",
+        "Type": 1,
+        "Walkspeed": 0.0
+    },
+    {
+        "Path": "Walls/wall-wns",
+        "Type": 1,
+        "Walkspeed": 0.0
+    }
+]

@@ -1,39 +1,54 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
+using Newtonsoft.Json;
+using UnityEngine.EventSystems;
 
 public class TileEngine : MonoBehaviour
 {
-    public List<TileType> TileTypes;
+    private List<TileSprite> TileSprites;
     public string DefaultTileTypeName = "empty";
-    private TileType defaultTileType;
+    private TileSprite defaultTileSprite;
     public GameObject TileContainer;
     public int Width;
     public int Heigth;
-    public int TileWidth = 32;
-    public int TileHeight = 32;
-
 
     public Tile[,] Tiles;
+
+    public List<Furniture> Furnitures;
     private List<Tile> ShadowTiles = new List<Tile>();
 
-    public TileType GetTileType(string name)
+    public TileSprite GetTileSprite(string name)
     {
-        return TileTypes.FirstOrDefault(c => c.Name == name);
+        return TileSprites.FirstOrDefault(c => c.FullName.ToLower() == name.ToLower());
     }
 
     void Start()
     {
-        defaultTileType = GetTileType(DefaultTileTypeName);
+        var spritedata = File.ReadAllText("assets/spritedata.json");
+        TileSprites = JsonConvert.DeserializeObject<List<TileSprite>>(spritedata);
+
+        foreach (var tileType in TileSprites)
+        {
+            var x = tileType.Sprite;
+        }
+
+
+        GameObject obj = new GameObject();
+
+        obj.transform.position = new Vector2(-1, -1);
+
+        defaultTileSprite = GetTileSprite(DefaultTileTypeName);
 
         Tiles = new Tile[Width, Heigth];
         for (var x = 0; x < Width; x++)
         {
             for (var y = 0; y < Heigth; y++)
             {
-                var tile = new Tile(this, "tile-" + x + "_" + y, defaultTileType, new Vector2(x, y), TileContainer);
+                var tile = new Tile(this, "tile-" + x + "_" + y, defaultTileSprite, new Vector2(x, y), TileContainer);
                 Tiles[x, y] = tile;
             }
         }
@@ -41,7 +56,7 @@ public class TileEngine : MonoBehaviour
 
     public Tile SpawnShadow()
     {
-        var shadowTile = new Tile(this, "shadow" + ShadowTiles.Count, defaultTileType, Vector2.zero, TileContainer, 0.5f);
+        var shadowTile = new Tile(this, "shadow" + ShadowTiles.Count, defaultTileSprite, Vector2.zero, TileContainer, 0.5f);
         shadowTile.Deactivate();
         ShadowTiles.Add(shadowTile);
         return shadowTile;
@@ -52,12 +67,18 @@ public class TileEngine : MonoBehaviour
 
     int tmpX, tmpY, stopX, stopY;
     // Update is called once per frame
-    TileType buildType;
+    TileSprite buildSprite;
+
+    public void SetBuild(string sprite)
+    {
+        buildSprite = GetTileSprite(sprite);
+    }
+
     void Update()
     {
-        if (buildType == null)
+        if (buildSprite == null)
         {
-            buildType = GetTileType("wall-we");
+            buildSprite = GetTileSprite("wall-");
         }
 
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -65,14 +86,14 @@ public class TileEngine : MonoBehaviour
 
         var mouseTileX = (int)mousePosition.x;
         var mouseTileY = (int)mousePosition.y;
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             startX = mouseTileX;
             startY = mouseTileY;
 
             dragging = true;
         }
-        else if (Input.GetMouseButtonUp(0))
+        else if (Input.GetMouseButtonUp(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             dragging = false;
             relesed = true;
@@ -96,6 +117,28 @@ public class TileEngine : MonoBehaviour
                 stopY = tmpY;
                 tmpY = tmp;
             }
+
+            if (buildSprite.Type == TileType.Wall)
+            {
+                if (stopX - tmpX < stopY - tmpY)
+                {
+                    stopX = startX;
+                    tmpX = startX;
+                }
+                else
+                {
+                    stopY = startY;
+                    tmpY = startY;
+                }
+            }
+            else if (buildSprite.Type == TileType.Furniture)
+            {
+                stopX = mouseTileX;
+                tmpX = mouseTileX;
+                stopY = mouseTileY;
+                tmpY = mouseTileY;
+            }
+
             if (stopX >= Width)
             {
                 stopX = Width - 1;
@@ -136,7 +179,7 @@ public class TileEngine : MonoBehaviour
 
                     shadow.Activate();
                     shadow.SetPosition(new Vector2(x, y));
-                    shadow.ChangeTileSprite(buildType);
+                    shadow.ChangeTileSprite(buildSprite);
 
                     shadowUsages++;
                 }
@@ -149,13 +192,14 @@ public class TileEngine : MonoBehaviour
             {
                 for (var y = tmpY; y <= stopY; y++)
                 {
-                    Tiles[x, y].ChangeNextTo();
+                    Tiles[x, y].Build(buildSprite);
                 }
             }
             foreach (var shadow in ShadowTiles)
             {
-                shadow.Deactivate();
+                shadow.Destroy();
             }
+            ShadowTiles.Clear();
         }
     }
 }
