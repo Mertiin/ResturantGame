@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 
@@ -55,21 +55,29 @@ public class Character
         }
     }
 
-    public void ClearPath()
+    public void ReCheckPath(List<Vector2> changedTiles)
     {
-        bool reCalculate = true;
-        foreach (var node in Path)
+        var fullPath = Path.ToArray();
+        if (fullPath.Any(i => changedTiles.Any(x => x.x == i.x && x.y == i.y)))
         {
-            if (TileEngine.GetTile((int)node.x, (int)node.y).WalkSpeed == 0)
+            bool reCalculate = true;
+            foreach (var node in Path)
             {
-                reCalculate = true;
+                if (TileEngine.GetTile((int)node.x, (int)node.y).WalkSpeed == 0)
+                {
+                    if (node.x == TargetPosition.x && node.y == TargetPosition.y)
+                    {
+                        TargetPosition = Position;
+                    }
+                    reCalculate = true;
+                }
             }
-        }
 
-        if (reCalculate)
-        {
-            checkedPoints.Clear();
-            Path.Clear();
+            if (reCalculate)
+            {
+                checkedPoints.Clear();
+                Path.Clear();
+            }
         }
     }
 

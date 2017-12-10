@@ -52,6 +52,7 @@ public class TileEngine : MonoBehaviour
                 Tiles[x, y] = tile;
             }
         }
+
         Tiles[0, 0].GetNeighbors();
         for (var i = 0; i < 100; i++)
         {
@@ -212,11 +213,13 @@ public class TileEngine : MonoBehaviour
         }
         else if (relesed)
         {
+            var changedTiles = new List<Vector2>();
             relesed = false;
             for (var x = tmpX; x <= stopX; x++)
             {
                 for (var y = tmpY; y <= stopY; y++)
                 {
+                    changedTiles.Add(new Vector2(x, y));
                     var tile = Tiles[x, y];
                     if (buildSprite.Name == "empty")
                     {
@@ -250,11 +253,12 @@ public class TileEngine : MonoBehaviour
 
             foreach (var item in Characters)
             {
-                item.ClearPath();
+                item.ReCheckPath(changedTiles);
             }
 
-            foreach(var item in Tiles){
-                item.SetColor(new Color(1,1,1,1));
+            foreach (var item in Tiles)
+            {
+                item.SetColor(new Color(1, 1, 1, 1));
             }
         }
     }
