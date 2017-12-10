@@ -47,12 +47,27 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\CameraController.cs" />
+     <Compile Include="Assets\Scripts\Character.cs" />
      <Compile Include="Assets\Scripts\Furniture.cs" />
+     <Compile Include="Assets\Scripts\Path\AStar.cs" />
+     <Compile Include="Assets\Scripts\Path\Breadth.cs" />
+     <Compile Include="Assets\Scripts\Path\Dijkstra.cs" />
+     <Compile Include="Assets\Scripts\Path\Greedy.cs" />
+     <Compile Include="Assets\Scripts\Path\PathHelper.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\FastPriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\FastPriorityQueueNode.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\GenericPriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\GenericPriorityQueueNode.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\IFixedSizePriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\IPriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\SimplePriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\StablePriorityQueue.cs" />
+     <Compile Include="Assets\Scripts\Priority Queue\StablePriorityQueueNode.cs" />
+     <Compile Include="Assets\Scripts\Tile\ObjectType.cs" />
      <Compile Include="Assets\Scripts\Tile\Tile.cs" />
      <Compile Include="Assets\Scripts\Tile\TileEngine.cs" />
      <Compile Include="Assets\Scripts\Tile\TileSprite.cs" />
-     <Compile Include="Assets\Scripts\Tile\TileType.cs" />
-     <Compile Include="Assets\Scripts\TileObject.cs" />
+     <Compile Include="Assets\Scripts\WorldObject.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

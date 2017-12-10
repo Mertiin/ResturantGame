@@ -9,37 +9,37 @@ using UnityEngine.EventSystems;
 
 public class TileEngine : MonoBehaviour
 {
+    System.Random random = new System.Random();
     private List<TileSprite> TileSprites;
     public string DefaultTileTypeName = "empty";
     private TileSprite defaultTileSprite;
     public GameObject TileContainer;
+    public GameObject FurnitureContainer;
     public int Width;
     public int Heigth;
 
-    public Tile[,] Tiles;
+    private Tile[,] Tiles;
 
-    public List<Furniture> Furnitures;
+    public List<Furniture> Furnitures = new List<Furniture>();
     private List<Tile> ShadowTiles = new List<Tile>();
+    public List<Character> Characters = new List<Character>();
 
     public TileSprite GetTileSprite(string name)
     {
         return TileSprites.FirstOrDefault(c => c.FullName.ToLower() == name.ToLower());
     }
 
+    public Furniture GetFurnitureFromPosition(int x, int y)
+    {
+        return Furnitures.FirstOrDefault(c => (c.IsInBound(x, y)));
+    }
+
     void Start()
     {
         var spritedata = File.ReadAllText("assets/spritedata.json");
         TileSprites = JsonConvert.DeserializeObject<List<TileSprite>>(spritedata);
-
-        foreach (var tileType in TileSprites)
-        {
-            var x = tileType.Sprite;
-        }
-
-
-        GameObject obj = new GameObject();
-
-        obj.transform.position = new Vector2(-1, -1);
+        var sprite = GetTileSprite("teen");
+        Debug.Log("test_" + sprite.Name);
 
         defaultTileSprite = GetTileSprite(DefaultTileTypeName);
 
@@ -52,6 +52,25 @@ public class TileEngine : MonoBehaviour
                 Tiles[x, y] = tile;
             }
         }
+        Tiles[0, 0].GetNeighbors();
+        for (var i = 0; i < 100; i++)
+        {
+            var character = new Character(new Vector2(random.Next(0, Width - 1), random.Next(0, Heigth - 1)), GetTileSprite("teen"), this);
+            Characters.Add(character);
+            character.TargetPosition = new Vector2(random.Next(0, Width - 1), random.Next(0, Heigth - 1));
+        }
+    }
+
+    public Tile GetTile(int x, int y)
+    {
+        if (x < 0 || y < 0 || x >= Width || y >= Heigth)
+            return null;
+        return Tiles[x, y];
+    }
+
+    public Tile GetTile(Vector2 p)
+    {
+        return GetTile((int)p.x, (int)p.y);
     }
 
     public Tile SpawnShadow()
@@ -76,6 +95,11 @@ public class TileEngine : MonoBehaviour
 
     void Update()
     {
+        foreach (var item in Characters)
+        {
+            item.Update();
+        }
+
         if (buildSprite == null)
         {
             buildSprite = GetTileSprite("wall-");
@@ -86,6 +110,7 @@ public class TileEngine : MonoBehaviour
 
         var mouseTileX = (int)mousePosition.x;
         var mouseTileY = (int)mousePosition.y;
+
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             startX = mouseTileX;
@@ -118,7 +143,7 @@ public class TileEngine : MonoBehaviour
                 tmpY = tmp;
             }
 
-            if (buildSprite.Type == TileType.Wall)
+            if (buildSprite.Type == ObjectType.Wall)
             {
                 if (stopX - tmpX < stopY - tmpY)
                 {
@@ -131,7 +156,7 @@ public class TileEngine : MonoBehaviour
                     tmpY = startY;
                 }
             }
-            else if (buildSprite.Type == TileType.Furniture)
+            else if (buildSprite.Type == ObjectType.Furniture)
             {
                 stopX = mouseTileX;
                 tmpX = mouseTileX;
@@ -192,14 +217,45 @@ public class TileEngine : MonoBehaviour
             {
                 for (var y = tmpY; y <= stopY; y++)
                 {
-                    Tiles[x, y].Build(buildSprite);
+                    var tile = Tiles[x, y];
+                    if (buildSprite.Name == "empty")
+                    {
+                        var furniture = GetFurnitureFromPosition(x, y);
+                        if (furniture != null)
+                        {
+                            furniture.Destroy();
+                            Furnitures.Remove(furniture);
+                        }
+                    }
+                    else if (buildSprite.Type == ObjectType.Furniture)
+                    {
+                        var furniture = GetFurnitureFromPosition(x, y);
+                        if (furniture == null)
+                        {
+                            Furnitures.Add(new Furniture(tile, buildSprite, FurnitureContainer));
+                        }
+                    }
+                    else
+                    {
+                        tile.Build(buildSprite);
+                    }
                 }
             }
+
             foreach (var shadow in ShadowTiles)
             {
                 shadow.Destroy();
             }
             ShadowTiles.Clear();
+
+            foreach (var item in Characters)
+            {
+                item.ClearPath();
+            }
+
+            foreach(var item in Tiles){
+                item.SetColor(new Color(1,1,1,1));
+            }
         }
     }
 }

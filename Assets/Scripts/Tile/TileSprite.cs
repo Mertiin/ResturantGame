@@ -65,7 +65,7 @@ public class TileSprite
         }
     }
     public float Walkspeed = 1f;
-    public TileType Type;
+    public ObjectType Type;
 
     public TileSprite()
     {
